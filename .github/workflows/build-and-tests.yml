@@ -311,14 +311,18 @@ jobs:
         if: ${{ !matrix.settings.is-wasm-build }}
 
   build-openbsd:
-    name: Build x86_64-unknown-openbsd
+    name: Build OpenBSD
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         os:
-          - name: openbsd
-            architecture: x86-64
+          - architecture: x86_64
             version: '7.8'
+            target: x86_64-unknown-openbsd
+          - architecture: aarch64
+            version: '7.8'
+            target: aarch64-unknown-openbsd
 
     steps:
       - name: Checkout Commit
@@ -333,20 +337,20 @@ jobs:
             ~/.cargo/git/db/
             .cargo-cache
             rust/target/
-          key: x86_64-unknown-openbsd-cargo-ubuntu-latest-${{ hashFiles('rust/Cargo.lock') }}
-          restore-keys: x86_64-unknown-openbsd-cargo-ubuntu-latest
+          key: ${{ matrix.os.target }}-cargo-ubuntu-latest-${{ hashFiles('rust/Cargo.lock') }}
+          restore-keys: ${{ matrix.os.target }}-cargo-ubuntu-latest
 
       - name: Install and Cache Node Dependencies
         uses: ./.github/actions/install-and-cache-node-deps
 
       - name: Build (OpenBSD)
-        uses: cross-platform-actions/action@492b0c80085400348c599edace11141a4ee73524 # v0.32.0
+        uses: vmactions/openbsd-vm@9004791062e748d95cc87e499e77485f91888ce1 # v1.3.8
         with:
-          operating_system: ${{ matrix.os.name }}
-          architecture: ${{ matrix.os.architecture }}
-          version: ${{ matrix.os.version }}
+          arch: ${{ matrix.os.architecture }}
+          release: ${{ matrix.os.version }}
+          cpu: 4
           run: |
-            sudo pkg_add rust node cmake
+            pkg_add rust node cmake
             sed -i 's^rustflags.*^^g' rust/bindings_napi/.cargo/config.toml
             npm run build:napi
 
@@ -360,12 +364,12 @@ jobs:
             ~/.cargo/git/db/
             .cargo-cache
             rust/target/
-          key: x86_64-unknown-openbsd-cargo-ubuntu-latest-${{ hashFiles('rust/Cargo.lock') }}
+          key: ${{ matrix.os.target }}-cargo-ubuntu-latest-${{ hashFiles('rust/Cargo.lock') }}
 
       - name: Upload napi artifact
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
-          name: bindings-x86_64-unknown-openbsd
+          name: bindings-${{ matrix.os.target }}
           path: ${{ env.APP_NAME }}.*.node
           if-no-files-found: error
 
