@@ -345,6 +345,25 @@ jobs:
       - name: Install and Cache Node Dependencies
         uses: ./.github/actions/install-and-cache-node-deps
 
+      - name: Vendor dependencies
+        run: |
+          cd rust
+          mkdir -p .cargo
+          cargo vendor > .cargo/config.toml
+          cd bindings_napi
+          mkdir -p .cargo
+          cargo vendor > .cargo/config.toml
+          cd ../bindings_wasm
+          mkdir -p .cargo
+          cargo vendor > .cargo/config.toml
+          cd ../parse_ast
+          mkdir -p .cargo
+          cargo vendor > .cargo/config.toml
+          cd ../xxhash
+          mkdir -p .cargo
+          cargo vendor > .cargo/config.toml
+
+
       - name: Build (OpenBSD)
         uses: cross-platform-actions/action@492b0c80085400348c599edace11141a4ee73524 # v0.32.0
         with:
