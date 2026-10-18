@@ -350,11 +350,11 @@ jobs:
         os:
           - name: openbsd
             architecture: x86-64
-            version: '7.8'
+            version: '7.9'
             target: x86_64-unknown-openbsd
           - name: openbsd
             architecture: arm64
-            version: '7.8'
+            version: '7.9'
             target: aarch64-unknown-openbsd
 
     steps:
